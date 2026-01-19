@@ -38,8 +38,10 @@ function PostCard({ post, index = 0, cardNumber = 1, onClick }) {
     'What Makes Your City\'s Style Unique' // Card 9 (index 8)
   ];
 
-  const category = categories[index] || 'Lifestyle';
-  const title = titles[index] || post.title || 'Eat Right For Your Exercise Regime';
+  // Ensure index is within bounds (0-8 for the hardcoded arrays)
+  const safeIndex = index >= 0 && index < categories.length ? index : 0;
+  const category = categories[safeIndex] || 'Lifestyle';
+  const title = titles[safeIndex] || post.title || 'Eat Right For Your Exercise Regime';
 
   return (
     <article className={`post-card ${cardNumber === 4 ? 'post-card-4' : ''}`} onClick={onClick}>

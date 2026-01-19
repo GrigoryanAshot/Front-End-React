@@ -60,8 +60,10 @@ function App() {
           throw new Error('Failed to fetch posts');
         }
         const data = await response.json();
-        setPosts(data);
-        setFilteredPosts(data);
+        // Add original index to each post
+        const postsWithIndex = data.map((post, index) => ({ ...post, __originalIndex: index }));
+        setPosts(postsWithIndex);
+        setFilteredPosts(postsWithIndex);
       } catch (err) {
         setError(err.message);
         console.error('Error fetching posts:', err);
@@ -81,34 +83,39 @@ function App() {
     }
 
     if (!searchQuery.trim()) {
-      setFilteredPosts(posts);
+      // Add original index to each post when not filtering
+      const postsWithIndex = posts.map((post, index) => ({ ...post, __originalIndex: index }));
+      setFilteredPosts(postsWithIndex);
       return;
     }
 
     try {
       const searchTerm = searchQuery.toLowerCase().trim();
-      const filtered = posts.filter(post => {
-        if (!post) return false;
-        
-        // Check all text fields in the post
-        const titleMatch = post.title?.toLowerCase().includes(searchTerm);
-        const textMatch = post.text?.toLowerCase().includes(searchTerm);
-        const descriptionMatch = post.description?.toLowerCase().includes(searchTerm);
-        
-        // Check category if it exists
-        const categoryMatch = post.category?.toLowerCase().includes(searchTerm);
-        
-        // Check author if it exists
-        const authorMatch = post.author?.toLowerCase().includes(searchTerm);
-        
-        // Check tags if they exist
-        const tagsMatch = Array.isArray(post.tags) && post.tags.some(tag => 
-          tag?.toLowerCase().includes(searchTerm)
-        );
-        
-        // Return true if any field contains the search term
-        return titleMatch || textMatch || descriptionMatch || categoryMatch || authorMatch || tagsMatch;
-      });
+      const filtered = posts
+        .map((post, originalIndex) => ({ post, originalIndex }))
+        .filter(({ post }) => {
+          if (!post) return false;
+          
+          // Check all text fields in the post
+          const titleMatch = post.title?.toLowerCase().includes(searchTerm);
+          const textMatch = post.text?.toLowerCase().includes(searchTerm);
+          const descriptionMatch = post.description?.toLowerCase().includes(searchTerm);
+          
+          // Check category if it exists
+          const categoryMatch = post.category?.toLowerCase().includes(searchTerm);
+          
+          // Check author if it exists
+          const authorMatch = post.author?.toLowerCase().includes(searchTerm);
+          
+          // Check tags if they exist
+          const tagsMatch = Array.isArray(post.tags) && post.tags.some(tag => 
+            tag?.toLowerCase().includes(searchTerm)
+          );
+          
+          // Return true if any field contains the search term
+          return titleMatch || textMatch || descriptionMatch || categoryMatch || authorMatch || tagsMatch;
+        })
+        .map(({ post, originalIndex }) => ({ ...post, __originalIndex: originalIndex }));
 
       setFilteredPosts(filtered);
     } catch (error) {
