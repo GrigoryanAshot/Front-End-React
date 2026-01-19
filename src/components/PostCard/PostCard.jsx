@@ -1,7 +1,8 @@
 function PostCard({ post, index = 0, cardNumber = 1, onClick }) {
   if (!post) return null;
-
-  const formatDate = (dateString) => {
+  
+  try {
+    const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -71,7 +72,11 @@ function PostCard({ post, index = 0, cardNumber = 1, onClick }) {
         </div>
       </div>
     </article>
-  );
+    );
+  } catch (error) {
+    console.error('Error rendering PostCard:', error);
+    return null;
+  }
 }
 
 export default PostCard;

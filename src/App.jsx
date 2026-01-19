@@ -75,34 +75,46 @@ function App() {
 
   // Filter posts based on search query
   useEffect(() => {
+    if (!posts || posts.length === 0) {
+      setFilteredPosts([]);
+      return;
+    }
+
     if (!searchQuery.trim()) {
       setFilteredPosts(posts);
       return;
     }
 
-    const searchTerm = searchQuery.toLowerCase().trim();
-    const filtered = posts.filter(post => {
-      // Check all text fields in the post
-      const titleMatch = post.title?.toLowerCase().includes(searchTerm);
-      const textMatch = post.text?.toLowerCase().includes(searchTerm);
-      const descriptionMatch = post.description?.toLowerCase().includes(searchTerm);
-      
-      // Check category if it exists
-      const categoryMatch = post.category?.toLowerCase().includes(searchTerm);
-      
-      // Check author if it exists
-      const authorMatch = post.author?.toLowerCase().includes(searchTerm);
-      
-      // Check tags if they exist
-      const tagsMatch = post.tags?.some(tag => 
-        tag?.toLowerCase().includes(searchTerm)
-      );
-      
-      // Return true if any field contains the search term
-      return titleMatch || textMatch || descriptionMatch || categoryMatch || authorMatch || tagsMatch;
-    });
+    try {
+      const searchTerm = searchQuery.toLowerCase().trim();
+      const filtered = posts.filter(post => {
+        if (!post) return false;
+        
+        // Check all text fields in the post
+        const titleMatch = post.title?.toLowerCase().includes(searchTerm);
+        const textMatch = post.text?.toLowerCase().includes(searchTerm);
+        const descriptionMatch = post.description?.toLowerCase().includes(searchTerm);
+        
+        // Check category if it exists
+        const categoryMatch = post.category?.toLowerCase().includes(searchTerm);
+        
+        // Check author if it exists
+        const authorMatch = post.author?.toLowerCase().includes(searchTerm);
+        
+        // Check tags if they exist
+        const tagsMatch = Array.isArray(post.tags) && post.tags.some(tag => 
+          tag?.toLowerCase().includes(searchTerm)
+        );
+        
+        // Return true if any field contains the search term
+        return titleMatch || textMatch || descriptionMatch || categoryMatch || authorMatch || tagsMatch;
+      });
 
-    setFilteredPosts(filtered);
+      setFilteredPosts(filtered);
+    } catch (error) {
+      console.error('Error filtering posts:', error);
+      setFilteredPosts(posts); // Fallback to showing all posts on error
+    }
   }, [searchQuery, posts]);
 
   const handlePostClick = (post) => {

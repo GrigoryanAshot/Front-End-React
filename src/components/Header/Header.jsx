@@ -13,8 +13,13 @@ function Header({ searchQuery, onSearchChange }) {
   };
 
   const handleSearchInputChange = (e) => {
-    if (onSearchChange) {
-      onSearchChange(e.target.value);
+    try {
+      const value = e?.target?.value || '';
+      if (onSearchChange) {
+        onSearchChange(value);
+      }
+    } catch (error) {
+      console.error('Error handling search input:', error);
     }
   };
 
